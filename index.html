@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<title>背包九讲</title>
+	</head>
+<body>
+<h1>背包九讲</h1>
+
+<h3>动态规划</h3>
+
+<ul>
+	<li>状态表示
+
+		<ul>
+			<li>集合表示</li>
+			<li>集合属性</li>
+		</ul></li>
+	<li>状态转移
+
+		<ul>
+			<li>集合划分</li>
+			<li>递推公式</li>
+		</ul></li>
+	<li>状态压缩</li>
+</ul>
+
+<h2>01背包</h2>
+
+<ul>
+	<li>问题描述：
+
+		<p>给定一个容量为V的背包和n种物品（数量唯一），每种物品具有一定的价值和体积，求背包最大价值</p></li>
+	<li>状态表示：
+
+		<ul>
+			<li>集合
+
+				<p>f[i,j] ： 只选择前i个物品，体积不超过j；</p></li>
+			<li>集合属性
+
+				<p>当前集合状态下的最大价值；</p></li>
+		</ul></li>
+	<li>状态转移
+
+		<ul>
+			<li>集合划分
+
+				<p>f[i,j] 划分为：</p>
+
+				<ul>
+					<li>不包含第i个物品：f[i -1,j]；</li>
+					<li>一定包含第i个物品：f[i-1,j - v[i] ]：</li>
+				</ul></li>
+			<li>转移方程
+
+				<p>f[i,j] = max( f[i - 1,j] , f[i - 1,j - v[i] ] + w[i] ] </p>
+
+				<p><strong>
+				</strong></p>
+
+				<blockquote>
+				<p>f[i,j]中除去第i个物品的最大值一定与f[i-1,j - v[i] ] 相等，否则若存在更大元素e属于f[i-1,j - v[i] ] ，e不属于f[i,j]，则f[i,j]不是最大，矛盾。</p>
+				</blockquote>
+
+				<p><strong>
+				</strong></p></li>
+		</ul></li>
+	<li>代码实现</li>
+</ul>
+
+<pre><code class="code-highlighted code-cpp">#<span class="syntax-all syntax-keyword">pragma</span> GCC optimize(2)
+#<span class="syntax-all syntax-keyword">include</span> <span class="syntax-all syntax-string">&lt;iostream&gt;</span>
+#<span class="syntax-all syntax-keyword">include</span> <span class="syntax-all syntax-string">&lt;algorithm&gt;</span>
+
+<span class="syntax-all syntax-keyword">using</span> <span class="syntax-all syntax-keyword">namespace</span> <span class="syntax-all syntax-entity">std</span>;
+
+<span class="syntax-all syntax-keyword">const</span> <span class="syntax-all syntax-keyword">int</span> N = <span class="syntax-all syntax-constant">1010</span>,M = <span class="syntax-all syntax-constant">1010</span>;
+
+<span class="syntax-all syntax-keyword">int</span> n,m;
+<span class="syntax-all syntax-keyword">int</span> v[N],w[N],f[N][M];
+
+<span class="syntax-all syntax-keyword">int</span> <span class="syntax-all syntax-entity">main</span>(){
+    cin.<span class="syntax-all syntax-constant">tie</span>(<span class="syntax-all syntax-constant">0</span>);
+    <span class="syntax-all syntax-constant">ios::sync_with_stdio</span>(<span class="syntax-all syntax-constant">false</span>);
+    cin &gt;&gt; n &gt;&gt; m;
+    <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i= <span class="syntax-all syntax-constant">1</span>;i &lt;= n; ++ i)<span class="syntax-all syntax-comment">//从1存储，防止越界
+</span>        cin &gt;&gt; v[i] &gt;&gt; w[i];
+        
+    <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;= n; ++ i)
+        <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j = <span class="syntax-all syntax-constant">1</span>; j &lt;= m ;++ j){<span class="syntax-all syntax-comment">//j = 0 的情况一定为0
+</span>            f[i][j] = f[i-<span class="syntax-all syntax-constant">1</span>][j];
+            <span class="syntax-all syntax-keyword">if</span>(j &gt;= v[i]) f[i][j] = <span class="syntax-all syntax-constant">max</span>(f[i][j],f[i-<span class="syntax-all syntax-constant">1</span>][j-v[i]] + w[i]);
+        }
+    cout &lt;&lt; f[n][m] &lt;&lt;endl;
+    <span class="syntax-all syntax-keyword">return</span> <span class="syntax-all syntax-constant">0</span>;
+}</code></pre>
+
+<p><strong>
+</strong></p>
+
+<ul>
+	<li>状态压缩 
+
+		<p>f[i,j] 一定是由 f[i - 1]转移而来，并且j 和j - v[i] 都小于等于j，利用滚动数组优化状态表示，化二维为一维： </p></li>
+</ul>
+
+<pre><code class="code-highlighted code-cpp">     <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;= n ;++ i)
+        <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j = m; j&gt;= v[i] ; -- j)
+            f[j] = max(f[j],f[j - v[i]] + w[i]);</code></pre>
+
+<blockquote>
+<p>状态转移时逆序递推，保证在计算当前第i个物品一定是由i - 1转移而来；若正序递推，实际上的状态转移：f[i,j] = max(f[i,j],f[i,j - v[i] ] </p>
+</blockquote>
+
+<p><strong>
+</strong></p>
+
+<h2>完全背包</h2>
+
+<ul>
+	<li>问题描述：
+
+		<p>给定一个容量为V的背包和n种物品（数量∞），每种物品具有一定的价值和体积，求背包最大价值</p></li>
+	<li>状态表示：
+
+		<ul>
+			<li>集合
+
+				<p>f[i,j] ： 只选择前i个物品，体积不超过j；</p></li>
+			<li>集合属性
+
+				<p>当前集合状态下的最大价值；</p></li>
+		</ul></li>
+	<li>状态转移
+
+		<ul>
+			<li>集合划分
+
+				<p>f[i,j] 划分为：</p>
+
+				<ul>
+					<li>不包含第i个物品：f[i -1,j]；</li>
+					<li>一定包含第i个物品：
+
+						<p>第i个物品有1、2、3 ...、k个，k*v[i] &lt;= j</p></li>
+				</ul></li>
+			<li>转移方程
+
+				<p>f[i,j] = max( f[i-1, j], f[i - 1, j - 1*v[i] ] + w[i]*1, … , f[i - 1, j - k*v[i] + w[i]*k)</p></li>
+			<li></li>
+			<li>代码实现</li>
+		</ul>
+
+<pre><code class="code-highlighted code-cpp"><span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;=n; ++ i)
+    	<span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j = <span class="syntax-all syntax-constant">0</span>;j &lt;= m;++ j)
+        	<span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> k = <span class="syntax-all syntax-constant">0</span>;v[i]*k &lt;= j;++ k)
+            	f[i][j] = max(f[i][j], f[i - <span class="syntax-all syntax-constant">1</span>][j - v[i]*k] + w[i]*k);</code></pre>
+
+		<p><strong>
+		</strong></p></li>
+	<li>状态压缩
+
+		<p><em>f[i,j] = max( f[i-1, j], f[i - 1, j - 1*v[i] ] + w[i]*1, … , f[i - 1, j - k*v[i] + w[i]*k)
+		</em></p></li>
+</ul>
+
+<p><strong>
+</strong></p>
+
+<p><em>f[i ,j - v[i] ] = max( f[i - 1, j - 2*v[i] ] + w[i]*1, … , f[i - 1, j - k*v[i] + w[i]*(k - 1) )
+</em></p>
+
+<p><strong>
+</strong></p>
+
+<blockquote>
+<p>可见，f[i,j]一定包含第i 个物品的部分仅与f[i,j - v[i] ] 差一个w[i]，f[i, j ] = max( f[i - 1, j ] , f[i ,j - v[i] ] + w[i] )</p>
+</blockquote>
+
+<pre><code class="code-highlighted code-cpp"><span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;=n; ++ i)
+        <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j = <span class="syntax-all syntax-constant">0</span>;j &lt;= m;++ j){
+            f[i][j] = f[i-<span class="syntax-all syntax-constant">1</span>][j];
+            <span class="syntax-all syntax-keyword">if</span>(j &gt;= v[i]) f[i][j] = <span class="syntax-all syntax-constant">max</span>(f[i][j],f[i][j - v[i]] + w[i]);  
+        }</code></pre>
+
+<ul>
+	<li>状态压缩plus</li>
+</ul>
+
+<pre><code class="code-highlighted code-cpp">#<span class="syntax-all syntax-keyword">pragma</span> GCC optimize(2)
+#<span class="syntax-all syntax-keyword">include</span> <span class="syntax-all syntax-string">&lt;iostream&gt;</span>
+#<span class="syntax-all syntax-keyword">include</span> <span class="syntax-all syntax-string">&lt;algorithm&gt;</span>
+
+
+<span class="syntax-all syntax-keyword">using</span> <span class="syntax-all syntax-keyword">namespace</span> <span class="syntax-all syntax-entity">std</span>;
+
+<span class="syntax-all syntax-keyword">const</span> <span class="syntax-all syntax-keyword">int</span> N = <span class="syntax-all syntax-constant">1010</span>, M = <span class="syntax-all syntax-constant">1010</span>;
+
+<span class="syntax-all syntax-keyword">int</span> n,m;
+<span class="syntax-all syntax-keyword">int</span> v[N],w[N],f[M];
+
+<span class="syntax-all syntax-keyword">int</span> <span class="syntax-all syntax-entity">main</span>(){
+    cin.<span class="syntax-all syntax-constant">tie</span>(<span class="syntax-all syntax-constant">0</span>);
+    <span class="syntax-all syntax-constant">ios::sync_with_stdio</span>(<span class="syntax-all syntax-constant">false</span>);
+    cin &gt;&gt; n &gt;&gt; m;
+    <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;=n ;++ i)
+        cin &gt;&gt; v[i] &gt;&gt; w[i];
+
+    <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i = <span class="syntax-all syntax-constant">1</span>;i &lt;=n; ++ i)
+        <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j = v[i];j &lt;= m;++ j)<span class="syntax-all syntax-comment">//正序
+</span>            f[j] = <span class="syntax-all syntax-constant">max</span>(f[j],f[j - v[i]] + w[i]);  
+    cout &lt;&lt; f[m] &lt;&lt;endl;
+    <span class="syntax-all syntax-keyword">return</span> <span class="syntax-all syntax-constant">0</span>;
+}</code></pre>
+
+<blockquote>
+<p>在计算f[j]时:</p>
+
+<p>j是由f[i - 1,j]转移而来;</p>
+
+<p>由于j - v[i] &lt; j , 计算f[j - v[i] ]时已经将之转移到了f[i,j - v[i] ]</p>
+</blockquote>
+
+<p><strong>
+</strong></p>
+
+<h2>多重背包</h2>
+
+<ul>
+	<li>问题描述：
+
+		<p>给定一个容量为V的背包和n种物品（数量s[i]），每种物品具有一定的价值和体积，求背包最大价值</p></li>
+</ul>
+
+<blockquote>
+<p>事实上，多重背包问题就是有数量限制的完全背包问题</p>
+</blockquote>
+
+<pre><code class="code-highlighted code-cpp"><span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> i=<span class="syntax-all syntax-constant">1</span>;i&lt;=n;++i)
+        <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> j=<span class="syntax-all syntax-constant">1</span>;j&lt;=m;++j)
+            <span class="syntax-all syntax-keyword">for</span>(<span class="syntax-all syntax-keyword">int</span> k=<span class="syntax-all syntax-constant">0</span>;k&lt;=s[i] &amp;&amp; k*v[i]&lt;= j;++k)
+                f[i][j] = max(f[i][j],f[i-<span class="syntax-all syntax-constant">1</span>][j-v[i]*k] + w[i]*k);</code></pre>
+
+<ul>
+	<li>状态压缩
+
+		<p></p></li>
+</ul>
+
+<p><strong>
+</strong></p>
+
+<p><em>f[i,j] = max( f[i-1, j], f[i - 1, j - 1*v[i] ] + w[i]*1, … , f[i - 1, j - s[I]*v[i] + w[i]*s[i] )
+</em></p>
+
+<p><strong>
+</strong></p>
+
+<p><em>f[i ,j - v[i] ] = max( f[i - 1, j - 2*v[i] ] + w[i]*1, … , f[i - 1, j - s[i] *v[i] + w[i]*(s[i] - 1), f[i - 1, j - (s[i] + 1)*v[i] + w[i]*s[i] )</em></p>
+
+<p><strong>
+</strong></p>
+
+<blockquote>
+<p>相较于完全背包问题，一定包含第i个物品的部分不能完全由f[i ,j - v[i] ]转移而来，故之前的压缩方法失效</p>
+</blockquote>
+
+<p><strong>
+</strong></p>
+
+</body>
+</html>
+
